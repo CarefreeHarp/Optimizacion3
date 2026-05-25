@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<!--
+PRESENTACIÓN HTML OFFLINE - PROYECTO #3
+============================================================
+Este archivo está diseñado para ejecutarse localmente en cualquier computador y en cualquier navegador moderno,
+incluso sin conexión a internet. No depende de CDN, fuentes externas, librerías externas, frameworks ni imágenes remotas.
+
+Instrucciones para integrarlo en un workspace:
+1. Abrir este archivo .html directamente en el navegador.
+2. Las zonas marcadas con la clase .media-placeholder son espacios reservados para insertar imágenes, gráficas,
+   capturas del notebook, tablas exportadas o capturas del modelo de FlexSim.
+3. Cada placeholder incluye atributos data-slot, data-source y data-purpose para que otra IA o persona sepa exactamente
+   qué debe colocar allí. Para insertar una imagen, reemplazar el contenido interno del placeholder por:
+   <img src="ruta/local/de/la_imagen.png" alt="Descripción de la gráfica">
+4. Mantener la paleta, tipografía, espaciados, tarjetas KPI, encabezados y pies de página definidos en este CSS.
+5. Todo el estilo está embebido en este archivo. Cualquier IA que edite el HTML debe preservar las variables CSS del :root
+   y la estructura visual corporativa: blanco, azul navy, teal, gris claro y naranja como acento.
+6. Navegación offline incluida: flechas del teclado, barra espaciadora, botones inferior derecha y selector de diapositiva.
+
+IMPORTANTE:
+- La presentación sigue estructura tipo paper: Resumen, Introducción, Revisión de literatura, Metodología,
+  Resultados, Discusión, Conclusiones y Referencias.
+- El enfoque metodológico declarado es METODOLOGÍA EN CASCADA (Waterfall).
+- No se usa el nombre "DevOptima". Se conserva un estilo corporativo genérico con la marca textual "Software Solutions".
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulación de eventos discretos | Software Solutions</title>
+  <style>
+    :root {
+      --navy-950: #03162f;
+      --navy-900: #05224a;
+      --navy-800: #08315f;
+      --teal-700: #007d86;
+      --teal-600: #0097a0;
+      --teal-100: #e9fbfb;
+      --orange-600: #f26a00;
+      --orange-100: #fff1e6;
+      --gray-950: #161b22;
+      --gray-700: #4a5565;
+      --gray-500: #7b8794;
+      --gray-300: #d8dee8;
+      --gray-200: #edf1f7;
+      --gray-100: #f7f9fc;
+      --white: #ffffff;
+      --shadow-soft: 0 18px 45px rgba(3, 22, 47, 0.12);
+      --shadow-card: 0 8px 24px rgba(3, 22, 47, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --font-main: "Segoe UI", "Inter", "Aptos", "Arial", sans-serif;
+      --slide-pad-x: clamp(42px, 5vw, 84px);
+      --slide-pad-y: clamp(30px, 4vh, 58px);
+      --header-h: 72px;
+      --footer-h: 40px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #dfe5ee; font-family: var(--font-main); color: var(--navy-950); }
+    body { display: grid; place-items: center; }
+
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      background: var(--gray-100);
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateX(30px) scale(0.985);
+      transition: opacity 260ms ease, transform 260ms ease;
+      pointer-events: none;
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+      background: radial-gradient(circle at 92% 8%, rgba(0, 151, 160, 0.08), transparent 24%), var(--white);
+      display: grid;
+      grid-template-rows: var(--header-h) 1fr var(--footer-h);
+      gap: 14px;
+    }
+
+    .slide.active { opacity: 1; transform: translateX(0) scale(1); pointer-events: all; }
+
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 13px; min-width: 230px; }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: conic-gradient(from 45deg, var(--teal-600), var(--navy-900), var(--teal-600));
+      position: relative; box-shadow: var(--shadow-card);
+    }
+    .brand-mark::after { content: ""; position: absolute; inset: 9px; border-radius: 8px; background: var(--white); }
+    .brand-text strong { display: block; font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy-900); }
+    .brand-text span { display: block; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--teal-700); margin-top: 2px; }
+    .section-label { text-align: right; color: var(--navy-900); font-weight: 800; font-size: clamp(15px, 1.6vw, 23px); letter-spacing: -0.02em; }
+    .section-kicker { color: var(--teal-700); font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em; font-size: 12px; }
+
+    .content { min-height: 0; display: grid; align-items: stretch; }
+    .footer { height: var(--footer-h); background: var(--navy-950); color: var(--white); display: flex; align-items: center; justify-content: space-between; padding: 0 18px 0 22px; border-radius: 0 0 6px 6px; font-size: 11px; letter-spacing: 0.02em; }
+    .footer span:last-child { font-weight: 800; font-size: 13px; color: #d9ffff; }
+
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(40px, 5.4vw, 76px); line-height: 0.98; letter-spacing: -0.055em; color: var(--navy-950); max-width: 900px; }
+    h2 { font-size: clamp(28px, 3.2vw, 48px); line-height: 1.02; letter-spacing: -0.04em; color: var(--navy-950); }
+    h3 { font-size: clamp(18px, 2vw, 28px); line-height: 1.05; letter-spacing: -0.025em; color: var(--navy-900); }
+    .lead { font-size: clamp(18px, 1.7vw, 28px); line-height: 1.32; color: var(--gray-700); max-width: 980px; }
+    .accent { color: var(--teal-700); }
+    .orange { color: var(--orange-600); }
+    .muted { color: var(--gray-700); }
+    .tiny { font-size: 12px; color: var(--gray-500); line-height: 1.4; }
+
+    .grid-2 { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 28px; align-items: stretch; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: stretch; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; align-items: stretch; }
+    .stack { display: grid; gap: 18px; align-content: start; }
+    .center-y { align-content: center; }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .card.teal { background: linear-gradient(180deg, #ffffff, var(--teal-100)); border-color: rgba(0, 151, 160, .28); }
+    .card.orange { background: linear-gradient(180deg, #ffffff, var(--orange-100)); border-color: rgba(242, 106, 0, .26); }
+    .card.dark { background: linear-gradient(135deg, var(--navy-950), var(--navy-800)); color: var(--white); border: none; }
+    .card.dark h3, .card.dark p { color: var(--white); }
+
+    .kpi { display: grid; grid-template-rows: auto 1fr auto; gap: 10px; min-height: 150px; }
+    .kpi .icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 24px; background: var(--teal-100); color: var(--teal-700); font-weight: 900; }
+    .kpi .value { font-size: clamp(28px, 3vw, 48px); color: var(--teal-700); font-weight: 900; letter-spacing: -0.04em; }
+    .kpi.orange .icon { background: var(--orange-100); color: var(--orange-600); }
+    .kpi.orange .value { color: var(--orange-600); }
+    .kpi .label { font-size: 13px; color: var(--gray-700); line-height: 1.25; font-weight: 750; }
+
+    .big-number { font-size: clamp(42px, 6vw, 88px); font-weight: 900; letter-spacing: -0.07em; color: var(--teal-700); line-height: .9; }
+    .caption { color: var(--gray-700); font-size: clamp(14px, 1.15vw, 18px); line-height: 1.4; }
+
+    .insight-row { display: grid; grid-template-columns: 58px 1fr; gap: 18px; align-items: center; padding: 16px; border-radius: var(--radius-md); background: var(--gray-100); border: 1px solid var(--gray-300); }
+    .insight-icon { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font-size: 25px; font-weight: 900; color: var(--white); background: var(--teal-700); }
+    .insight-row.orange .insight-icon { background: var(--orange-600); }
+
+    .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; align-items: center; position: relative; }
+    .flow-card { min-height: 142px; display: grid; place-items: center; text-align: center; border-radius: var(--radius-lg); border: 2px solid rgba(0, 151, 160, .34); background: var(--white); box-shadow: var(--shadow-card); padding: 16px; }
+    .flow-card strong { display: block; color: var(--navy-950); font-size: 18px; margin-top: 8px; }
+    .flow-card span { font-size: 12px; color: var(--gray-700); font-weight: 700; }
+    .flow-icon { font-size: 34px; color: var(--teal-700); }
+    .arrow { position: relative; }
+    .flow-card:not(:last-child)::after { content: "→"; position: absolute; transform: translateX(calc(50% + 58px)); color: var(--gray-500); font-size: 32px; font-weight: 800; }
+
+    .media-placeholder {
+      border: 2px dashed rgba(0, 151, 160, .42);
+      border-radius: var(--radius-lg);
+      background: repeating-linear-gradient(135deg, rgba(0,151,160,.055), rgba(0,151,160,.055) 10px, rgba(255,255,255,.62) 10px, rgba(255,255,255,.62) 20px);
+      min-height: 240px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+      color: var(--teal-700);
+      font-weight: 850;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.7);
+    }
+    .media-placeholder.orange { border-color: rgba(242, 106, 0, .46); color: var(--orange-600); background: repeating-linear-gradient(135deg, rgba(242,106,0,.06), rgba(242,106,0,.06) 10px, rgba(255,255,255,.65) 10px, rgba(255,255,255,.65) 20px); }
+    .media-placeholder small { display: block; margin-top: 8px; color: var(--gray-700); font-weight: 650; line-height: 1.35; }
+    .media-placeholder img { width: 100%; height: 100%; object-fit: contain; border-radius: calc(var(--radius-lg) - 6px); }
+
+    .table { width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; border-radius: var(--radius-lg); border: 1px solid var(--gray-300); box-shadow: var(--shadow-card); background: var(--white); }
+    .table .row { display: grid; grid-template-columns: 1.1fr .9fr .9fr 1.2fr; border-bottom: 1px solid var(--gray-300); min-height: 54px; align-items: center; }
+    .table .row:last-child { border-bottom: none; }
+    .table .cell { padding: 13px 16px; font-size: 14px; line-height: 1.25; color: var(--gray-700); font-weight: 650; }
+    .table .head { background: var(--navy-950); }
+    .table .head .cell { color: var(--white); font-weight: 850; }
+    .table .cell.strong { color: var(--navy-950); font-weight: 900; }
+    .table .cell.teal-text { color: var(--teal-700); font-weight: 900; }
+    .table .cell.orange-text { color: var(--orange-600); font-weight: 900; }
+
+    .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .step { padding: 22px; border-radius: var(--radius-lg); background: var(--gray-100); border: 1px solid var(--gray-300); min-height: 180px; position: relative; overflow: hidden; }
+    .step::before { content: attr(data-step); position: absolute; right: 16px; top: 8px; font-size: 56px; color: rgba(0,151,160,.12); font-weight: 900; letter-spacing: -0.08em; }
+    .step h3 { margin-bottom: 12px; color: var(--teal-700); }
+    .step p { color: var(--gray-700); line-height: 1.35; font-size: 15px; }
+
+    .split-title { display: grid; gap: 16px; align-content: center; }
+    .hero-visual { position: relative; min-height: 460px; border-radius: var(--radius-xl); background: linear-gradient(145deg, var(--navy-950), var(--navy-800)); overflow: hidden; box-shadow: var(--shadow-soft); }
+    .hero-visual::before { content: ""; position: absolute; inset: -20% auto -20% -26%; width: 55%; background: linear-gradient(90deg, transparent, rgba(0,151,160,.42), transparent); transform: skewX(-12deg); }
+    .hero-lines { position: absolute; inset: 46px; border: 1px solid rgba(255,255,255,.16); border-radius: 26px; padding: 34px; color: #dff; display: grid; align-content: center; gap: 22px; }
+    .hero-lines .mock-code { height: 12px; border-radius: 20px; background: rgba(255,255,255,.7); width: 68%; box-shadow: 0 30px rgba(0,151,160,.9), 0 60px rgba(255,255,255,.36), 0 90px rgba(242,106,0,.86); }
+    .hero-lines .mock-chart { position: absolute; right: 34px; bottom: 34px; display: flex; gap: 8px; align-items: end; height: 120px; }
+    .hero-lines .mock-chart i { display: block; width: 18px; border-radius: 10px 10px 0 0; background: var(--teal-600); }
+    .hero-lines .mock-chart i:nth-child(1){ height: 38px; } .hero-lines .mock-chart i:nth-child(2){ height: 78px; background: var(--orange-600); } .hero-lines .mock-chart i:nth-child(3){ height: 52px; } .hero-lines .mock-chart i:nth-child(4){ height: 104px; }
+
+    .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .scenario { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gray-300); background: var(--white); box-shadow: var(--shadow-card); display: grid; grid-template-rows: auto 1fr; }
+    .scenario .scenario-head { padding: 16px 18px; color: var(--white); background: var(--navy-900); font-weight: 900; font-size: 17px; }
+    .scenario.teal .scenario-head { background: var(--teal-700); }
+    .scenario.orange .scenario-head { background: var(--orange-600); }
+    .scenario .scenario-body { padding: 20px; display: grid; gap: 14px; align-content: start; }
+    .scenario p { color: var(--gray-700); line-height: 1.35; }
+
+    .nav-controls { position: fixed; right: 22px; bottom: 18px; display: flex; gap: 8px; align-items: center; z-index: 20; }
+    .nav-controls button, .nav-controls select { border: 1px solid rgba(255,255,255,.22); background: rgba(3,22,47,.92); color: white; border-radius: 12px; padding: 10px 13px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 22px rgba(0,0,0,.18); }
+    .nav-controls button:hover { background: var(--teal-700); }
+
+    .progress { position: fixed; left: 0; bottom: 0; height: 4px; background: linear-gradient(90deg, var(--teal-600), var(--orange-600)); width: 0; z-index: 30; transition: width 220ms ease; }
+
+    @media print {
+      html, body { overflow: visible; height: auto; background: white; }
+      .deck { height: auto; overflow: visible; }
+      .slide { position: relative; opacity: 1 !important; transform: none !important; page-break-after: always; height: 100vh; }
+      .nav-controls, .progress { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" id="deck">
+
+    <!-- SLIDE 1 -->
+    <section class="slide active" data-title="Portada">
+      <header class="topbar">
+        <div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Operational Intelligence</span></div></div>
+        <div class="section-label">Proyecto #3 · Simulación de eventos discretos</div>
+      </header>
+      <div class="content grid-2">
+        <div class="split-title">
+          <div class="section-kicker">Metodología en cascada · Waterfall</div>
+          <h1>Simulación para optimizar el flujo de desarrollo de software</h1>
+          <p class="lead">Análisis de datos históricos, parametrización de FlexSim y evaluación de escenarios para mejorar capacidad, tiempos de entrega y control del retrabajo.</p>
+          <div class="grid-4">
+            <div class="card kpi"><div class="icon">↧</div><p class="label">Llegada de tareas</p><div class="value">11,57</div><p class="tiny">tareas/día</p></div>
+            <div class="card kpi"><div class="icon">⌘</div><p class="label">Desarrollo</p><div class="value">11,19</div><p class="tiny">horas promedio</p></div>
+            <div class="card kpi"><div class="icon">✓</div><p class="label">QA</p><div class="value">4,01</div><p class="tiny">horas promedio</p></div>
+            <div class="card kpi orange"><div class="icon">↻</div><p class="label">Retrabajo</p><div class="value">24,1%</div><p class="tiny">probabilidad</p></div>
+          </div>
+        </div>
+        <div class="hero-visual" aria-label="Visual corporativo de software y analítica">
+          <div class="hero-lines">
+            <h3 style="color:white;font-size:34px;max-width:420px">Decisiones operativas basadas en simulación</h3>
+            <div class="mock-code"></div>
+            <div class="mock-chart"><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer"><span>Software Solutions | Inteligencia operativa para equipos de desarrollo</span><span>01</span></footer>
+    </section>
+
+    <!-- SLIDE 2 -->
+    <section class="slide" data-title="Resumen ejecutivo">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Executive Summary</span></div></div><div class="section-label">2. Resumen ejecutivo</div></header>
+      <div class="content stack center-y">
+        <div class="grid-4">
+          <div class="card kpi"><div class="icon">Σ</div><p class="label">Promedio de tareas nuevas</p><div class="value">11,57</div><p class="tiny">por día histórico</p></div>
+          <div class="card kpi"><div class="icon">⏱</div><p class="label">Tiempo entre llegadas</p><div class="value">2,07</div><p class="tiny">horas aproximadas</p></div>
+          <div class="card kpi"><div class="icon">▣</div><p class="label">WIP histórico promedio</p><div class="value">8,66</div><p class="tiny">tareas en proceso</p></div>
+          <div class="card kpi orange"><div class="icon">↻</div><p class="label">Retrabajo efectivo</p><div class="value">24,1%</div><p class="tiny">probabilidad histórica</p></div>
+        </div>
+        <div class="grid-2">
+          <div class="card teal">
+            <h2>Lectura ejecutiva del sistema</h2>
+            <p class="lead" style="margin-top:18px">El sistema histórico recibe más tareas de las que completa en promedio diario. La simulación permite evaluar si el cuello de botella se genera en desarrollo, QA o en el retorno por retrabajo, sin intervenir directamente la operación real.</p>
+          </div>
+          <div class="media-placeholder" data-slot="grafica_resumen_demanda_capacidad" data-source="notebook_proyecto3.ipynb / tareas_nuevas_vs_completadas" data-purpose="Insertar gráfica comparativa de Tareas_Nuevas vs Tareas_Completadas.">
+            PLACEHOLDER GRÁFICA: demanda vs capacidad
+            <small>Reemplazar por imagen del notebook. No modificar estilo de tarjeta.</small>
+          </div>
+        </div>
+      </div>
+      <footer class="footer"><span>Resumen | Datos → Modelo → Escenarios → Recomendación</span><span>02</span></footer>
+    </section>
+
+    <!-- SLIDE 3 -->
+    <section class="slide" data-title="Introducción">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Contexto</span></div></div><div class="section-label">3. Introducción</div></header>
+      <div class="content grid-2">
+        <div class="stack center-y">
+          <h2>El desarrollo de software opera como un sistema con flujo, recursos limitados y reprocesos.</h2>
+          <p class="lead">En una metodología en cascada, el trabajo avanza por etapas secuenciales. Cuando aparecen defectos, cambios o fallas de validación, el retorno a etapas previas puede aumentar tiempos, congestión y carga sobre QA.</p>
+          <div class="grid-3">
+            <div class="card"><h3>Demanda</h3><p class="caption">Las tareas nuevas representan la entrada diaria del sistema y definen la presión inicial sobre el flujo.</p></div>
+            <div class="card"><h3>Capacidad</h3><p class="caption">Developers y QA limitan cuántas tareas pueden procesarse en paralelo.</p></div>
+            <div class="card"><h3>Calidad</h3><p class="caption">Bugs, cambios y retrabajo alteran la secuencia ideal de entrega.</p></div>
+          </div>
+        </div>
+        <div class="media-placeholder" data-slot="imagen_contexto_flujo_software" data-source="workspace" data-purpose="Insertar visual corporativo o diagrama contextual de empresa de desarrollo de software.">
+          PLACEHOLDER VISUAL: contexto de software
+          <small>Puede ser ilustración, captura o diagrama conceptual.</small>
+        </div>
+      </div>
+      <footer class="footer"><span>Introducción | Simulación de eventos discretos aplicada al desarrollo</span><span>03</span></footer>
+    </section>
+
+    <!-- SLIDE 4 -->
+    <section class="slide" data-title="Problema y objetivos">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Problema y objetivos</span></div></div><div class="section-label">4. Planteamiento del problema</div></header>
+      <div class="content stack center-y">
+        <div class="card dark">
+          <h2>Pregunta central</h2>
+          <p class="lead" style="margin-top:14px;color:white">¿Cómo cambia el desempeño del sistema de desarrollo bajo una metodología en cascada cuando se modifican recursos, demanda o condiciones de calidad?</p>
+        </div>
+        <div class="grid-3">
+          <div class="card teal"><h3>Objetivo operativo</h3><p class="caption">Convertir el dataset histórico en parámetros de entrada: llegadas, tiempos, recursos, probabilidades y reglas de retorno.</p></div>
+          <div class="card teal"><h3>Objetivo de simulación</h3><p class="caption">Construir en FlexSim un flujo representativo de cascada con etapas secuenciales, QA y retrabajo.</p></div>
+          <div class="card orange"><h3>Objetivo de decisión</h3><p class="caption">Comparar el escenario base contra alternativas de mejora o estrés y recomendar una acción viable.</p></div>
+        </div>
+      </div>
+      <footer class="footer"><span>Problema | La simulación debe producir evidencia, no solo visualización</span><span>04</span></footer>
+    </section>
+
+    <!-- SLIDE 5 -->
+    <section class="slide" data-title="Revisión de literatura">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Academic Frame</span></div></div><div class="section-label">5. Revisión de literatura</div></header>
+      <div class="content grid-2">
+        <div class="stack center-y">
+          <h2>La revisión debe conectar simulación, gestión de proyectos y control del flujo de trabajo.</h2>
+          <p class="lead">Esta sección se estructura como matriz de evidencia: autor, aporte y relación con el modelo. La idea no es llenar texto, sino justificar por qué la simulación de eventos discretos es adecuada para representar colas, recursos, tiempos de proceso y reprocesos.</p>
+          <div class="card orange"><h3>Nota para completar</h3><p class="caption">Insertar mínimo 10 referencias. Priorizar fuentes sobre simulación de eventos discretos, modelos de colas, desarrollo de software, Waterfall, QA, retrabajo y métricas ágiles/operativas.</p></div>
+        </div>
+        <div class="media-placeholder" data-slot="tabla_revision_literatura" data-source="Elicit / Consensus / Research Rabbit / SciSpace" data-purpose="Insertar tabla de autores: autor, año, aporte, relación con el proyecto.">
+          PLACEHOLDER TABLA: revisión de literatura
+          <small>La otra IA debe completar mínimo 10 referencias en formato consistente.</small>
+        </div>
+      </div>
+      <footer class="footer"><span>Revisión | Mínimo 10 referencias académicas o técnicas</span><span>05</span></footer>
+    </section>
+
+    <!-- SLIDE 6 -->
+    <section class="slide" data-title="Dataset">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Data Overview</span></div></div><div class="section-label">6. Dataset y variables clave</div></header>
+      <div class="content stack center-y">
+        <div class="grid-4">
+          <div class="card kpi"><div class="icon">365</div><p class="label">Registros diarios</p><div class="value">1 año</div><p class="tiny">operación histórica</p></div>
+          <div class="card kpi"><div class="icon">⚙</div><p class="label">Developers promedio</p><div class="value">5,10</div><p class="tiny">capacidad base 5</p></div>
+          <div class="card kpi"><div class="icon">✓</div><p class="label">QA promedio</p><div class="value">2,06</div><p class="tiny">capacidad base 2</p></div>
+          <div class="card kpi orange"><div class="icon">!</div><p class="label">Saturación QA</p><div class="value">18,1%</div><p class="tiny">histórico observado</p></div>
+        </div>
+        <div class="grid-2">
+          <div class="card teal"><h2>Variables convertidas en parámetros</h2><p class="lead" style="margin-top:14px">Las columnas de llegadas, tiempos, recursos y eventos discretos se usan para alimentar FlexSim. Las variables de desempeño como WIP, Lead Time, Cycle Time y tareas completadas se reservan para validación del comportamiento simulado.</p></div>
+          <div class="media-placeholder" data-slot="tabla_diccionario_variables" data-source="notebook_proyecto3.ipynb / diccionario de datos" data-purpose="Insertar tabla visual de columnas agrupadas por entrada, evento, recurso y validación.">
+            PLACEHOLDER TABLA: diccionario visual de variables
+            <small>Clasificar columnas por función dentro del modelo.</small>
+          </div>
+        </div>
+      </div>
+      <footer class="footer"><span>Dataset | Datos históricos agregados por día</span><span>06</span></footer>
+    </section>
+
+    <!-- SLIDE 7 -->
+    <section class="slide" data-title="Análisis de entrada">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Input Analysis</span></div></div><div class="section-label">7. Análisis de entrada</div></header>
+      <div class="content grid-2">
+        <div class="stack">
+          <h2>Llegadas, tipo de tarea y prioridad definen cómo entra el trabajo al sistema.</h2>
+          <div class="table" role="table" aria-label="Parámetros de entrada principales">
+            <div class="row head"><div class="cell">Parámetro</div><div class="cell">Valor</div><div class="cell">Fuente</div><div class="cell">Uso</div></div>
+            <div class="row"><div class="cell strong">Tareas nuevas</div><div class="cell teal-text">11,57/día</div><div class="cell">Tareas_Nuevas</div><div class="cell">Tasa de llegada</div></div>
+            <div class="row"><div class="cell strong">Tiempo entre llegadas</div><div class="cell teal-text">2,07 h</div><div class="cell">24 / 11,57</div><div class="cell">Source_Tareas</div></div>
+            <div class="row"><div class="cell strong">Feature</div><div class="cell">50,7%</div><div class="cell">Tipo_Tarea</div><div class="cell">Label de entidad</div></div>
+            <div class="row"><div class="cell strong">Bug</div><div class="cell">20,5%</div><div class="cell">Tipo_Tarea</div><div class="cell">Label de entidad</div></div>
+            <div class="row"><div class="cell strong">Hotfix</div><div class="cell orange-text">10,7%</div><div class="cell">Tipo_Tarea</div><div class="cell">Atención urgente</div></div>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="media-placeholder" data-slot="grafica_tipo_tarea" data-source="notebook_proyecto3.ipynb / frecuencias Tipo_Tarea" data-purpose="Insertar gráfico donut o barras de distribución por Tipo_Tarea.">
+            PLACEHOLDER GRÁFICA: distribución por tipo de tarea
+            <small>Ideal: donut corporativo o barras horizontales.</small>
+          </div>
+          <div class="media-placeholder orange" data-slot="grafica_prioridad" data-source="notebook_proyecto3.ipynb / frecuencias Prioridad" data-purpose="Insertar gráfico de distribución de prioridad: media, alta, baja, crítica.">
+            PLACEHOLDER GRÁFICA: distribución por prioridad
+            <small>Mostrar la prioridad histórica aunque FlexSim use regla operativa por tipo.</small>
+          </div>
+        </div>
+      </div>
+      <footer class="footer"><span>Análisis de entrada | La llegada exponencial es una aproximación por agregación diaria</span><span>07</span></footer>
+    </section>
+
+    <!-- SLIDE 8 -->
+    <section class="slide" data-title="Eventos discretos">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Discrete Events</span></div></div><div class="section-label">8. Eventos discretos y probabilidades</div></header>
+      <div class="content grid-2">
+        <div class="stack center-y">
+          <h2>Los eventos discretos representan situaciones que ocurren o no ocurren durante la operación.</h2>
+          <div class="grid-3">
+            <div class="card kpi"><div class="icon">🐞</div><p class="label">Bugs en QA</p><div class="value">22,2%</div><p class="tiny">evento de calidad</p></div>
+            <div class="card kpi orange"><div class="icon">↺</div><p class="label">Cambio requisitos</p><div class="value">14,2%</div><p class="tiny">retorno a etapa previa</p></div>
+            <div class="card kpi orange"><div class="icon">↻</div><p class="label">Retrabajo</p><div class="value">24,1%</div><p class="tiny">reproceso efectivo</p></div>
+          </div>
+          <p class="lead">Para el flujo de retorno se prioriza `Retrabajo_Flag`, porque identifica el reproceso efectivo. `Bugs_QA` se interpreta como evento de calidad y puede conectarse a la validación del modelo.</p>
+        </div>
+        <div class="media-placeholder" data-slot="tabla_probabilidades_eventos" data-source="probabilidades_eventos.xlsx" data-purpose="Insertar tabla o gráfico con Bugs_QA, Cambio_Requisitos, Hotfix_Urgente, Saturacion_QA, Ausencia_Recurso, Repriorizacion_Backlog, Retrabajo_Flag.">
+          PLACEHOLDER TABLA/GRÁFICA: probabilidades de eventos
+          <small>Usar el Excel probabilidades_eventos.xlsx.</small>
+        </div>
+      </div>
+      <footer class="footer"><span>Eventos | Probabilidad de ocurrencia = promedio de columnas binarias 0/1</span><span>08</span></footer>
+    </section>
+
+    <!-- SLIDE 9 -->
+    <section class="slide" data-title="Tiempos y distribuciones">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Statistical Fitting</span></div></div><div class="section-label">9. Tiempos y distribuciones</div></header>
+      <div class="content grid-2">
+        <div class="stack">
+          <h2>Los tiempos de proceso se parametrizan desde el Excel; las métricas globales se reservan para validar.</h2>
+          <div class="table" role="table" aria-label="Tiempos del modelo">
+            <div class="row head"><div class="cell">Variable</div><div class="cell">Media</div><div class="cell">Desv.</div><div class="cell">Uso</div></div>
+            <div class="row"><div class="cell strong">Tiempo_Desarrollo_Horas</div><div class="cell teal-text">11,19 h</div><div class="cell">2,43</div><div class="cell">Proceso Desarrollo</div></div>
+            <div class="row"><div class="cell strong">Tiempo_QA_Horas</div><div class="cell teal-text">4,01 h</div><div class="cell">1,15</div><div class="cell">Proceso QA</div></div>
+            <div class="row"><div class="cell strong">Horas_Retrabajo condicionadas</div><div class="cell orange-text">5,19 h</div><div class="cell">1,73</div><div class="cell">Proceso Retrabajo</div></div>
+            <div class="row"><div class="cell strong">Lead Time</div><div class="cell">15,83 h</div><div class="cell">2,91</div><div class="cell">Validación</div></div>
+            <div class="row"><div class="cell strong">Cycle Time</div><div class="cell">15,21 h</div><div class="cell">2,71</div><div class="cell">Validación</div></div>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="media-placeholder" data-slot="boxplots_tiempos" data-source="notebook_proyecto3.ipynb / boxplots" data-purpose="Insertar imagen de boxplots de Tareas_Nuevas, Tiempo_Desarrollo, Tiempo_QA, Horas_Retrabajo, Tareas_Completadas y WIP.">
+            PLACEHOLDER GRÁFICA: boxplots de variables numéricas
+            <small>Usar la imagen exportada del notebook.</small>
+          </div>
+          <div class="media-placeholder orange" data-slot="tabla_ajuste_distribuciones" data-source="ajuste_distribuciones.xlsx" data-purpose="Insertar tabla resumida de mejor distribución por variable según KS.">
+            PLACEHOLDER TABLA: ajuste de distribuciones KS
+            <small>Mostrar distribución recomendada, KS y p-value.</small>
+          </div>
+        </div>
+      </div>
+      <footer class="footer"><span>Distribuciones | KS orienta la selección, pero el sentido del proceso valida la decisión</span><span>09</span></footer>
+    </section>
+
+    <!-- SLIDE 10 -->
+    <section class="slide" data-title="Modelo conceptual">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Waterfall Model</span></div></div><div class="section-label">10. Modelo conceptual en cascada</div></header>
+      <div class="content stack center-y">
+        <h2>El flujo en cascada se representa como una secuencia controlada con retorno por defectos o cambios.</h2>
+        <div class="flow">
+          <div class="flow-card arrow"><div><div class="flow-icon">↧</div><strong>Llegada</strong><span>Tareas nuevas</span></div></div>
+          <div class="flow-card arrow"><div><div class="flow-icon">▤</div><strong>Requisitos</strong><span>Clasificación / alcance</span></div></div>
+          <div class="flow-card arrow"><div><div class="flow-icon">⌘</div><strong>Desarrollo</strong><span>Implementación</span></div></div>
+          <div class="flow-card arrow"><div><div class="flow-icon">✓</div><strong>QA</strong><span>Validación</span></div></div>
+          <div class="flow-card"><div><div class="flow-icon">➤</div><strong>Entrega</strong><span>Salida del sistema</span></div></div>
+        </div>
+        <div class="grid-3">
+          <div class="card"><h3>Regla de prioridad</h3><p class="caption">Se puede usar prioridad histórica o política operativa por tipo. Para cascada se recomienda justificar explícitamente la política elegida.</p></div>
+          <div class="card orange"><h3>Retrabajo</h3><p class="caption">Si QA detecta fallo o si se activa un cambio relevante, la tarea retorna a desarrollo/retrabajo con control de ciclos.</p></div>
+          <div class="card teal"><h3>Supuesto crítico</h3><p class="caption">Requisitos y diseño no tienen tiempos separados en el Excel. Si se modelan con duración, deben declararse como supuestos.</p></div>
+        </div>
+      </div>
+      <footer class="footer"><span>Modelo conceptual | Cascada: avance secuencial y reproceso cuando no se cumplen criterios</span><span>10</span></footer>
+    </section>
+
+    <!-- SLIDE 11 -->
+    <section class="slide" data-title="Implementación FlexSim">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>FlexSim Setup</span></div></div><div class="section-label">11. Implementación en FlexSim</div></header>
+      <div class="content grid-2">
+        <div class="stack center-y">
+          <h2>La implementación traduce parámetros estadísticos en objetos, colas, recursos y decisiones.</h2>
+          <div class="grid-2" style="grid-template-columns:1fr 1fr">
+            <div class="card"><h3>Source_Tareas</h3><p class="caption">`exponential(0, 2.0744, getstream(current))` para aproximar llegada individual desde la agregación diaria.</p></div>
+            <div class="card"><h3>P_Desarrollo</h3><p class="caption">Tiempo base desde `Tiempo_Desarrollo_Horas`; capacidad histórica redondeada: 5 developers.</p></div>
+            <div class="card"><h3>P_QA</h3><p class="caption">Tiempo desde `Tiempo_QA_Horas`; capacidad histórica redondeada: 2 QA.</p></div>
+            <div class="card orange"><h3>P_Retrabajo</h3><p class="caption">Activación con probabilidad 24,1% y duración condicionada a casos con retrabajo.</p></div>
+          </div>
+        </div>
+        <div class="media-placeholder" data-slot="captura_modelo_flexsim_base" data-source="FlexSim" data-purpose="Insertar captura del modelo base en FlexSim con Source, colas, procesadores, QA, retrabajo y Sink.">
+          PLACEHOLDER CAPTURA: modelo base en FlexSim
+          <small>Debe mostrar claramente flujo, colas, recursos y rutas de reproceso.</small>
+        </div>
+      </div>
+      <footer class="footer"><span>FlexSim | Conectar cada objeto del modelo con una fuente de datos o supuesto declarado</span><span>11</span></footer>
+    </section>
+
+    <!-- SLIDE 12 -->
+    <section class="slide" data-title="Escenarios">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Scenarios</span></div></div><div class="section-label">12. Escenarios simulados</div></header>
+      <div class="content scenario-grid">
+        <div class="scenario"><div class="scenario-head">Escenario A · Base</div><div class="scenario-body"><h3>Operación histórica</h3><p>Usa parámetros calculados del Excel: 5 developers, 2 QA, llegada media de 2,07 horas entre tareas, probabilidad de cambio de requisitos de 14,2% y retrabajo de 24,1%.</p><div class="media-placeholder" data-slot="captura_escenario_base" data-source="FlexSim" data-purpose="Insertar captura o tabla del escenario base.">PLACEHOLDER BASE</div></div></div>
+        <div class="scenario teal"><div class="scenario-head">Escenario B · Mejora</div><div class="scenario-body"><h3>Mayor capacidad en QA</h3><p>Incrementa QA de 2 a 3 recursos para evaluar si la congestión de pruebas se reduce y si mejora el flujo de entrega bajo cascada.</p><div class="media-placeholder" data-slot="captura_escenario_mejora" data-source="FlexSim" data-purpose="Insertar captura o tabla del escenario mejora.">PLACEHOLDER MEJORA</div></div></div>
+        <div class="scenario orange"><div class="scenario-head">Escenario C · Estrés</div><div class="scenario-body"><h3>Demanda +20%</h3><p>Aumenta la entrada a 13,88 tareas/día. El nuevo tiempo entre llegadas aproximado es 1,73 horas, lo que permite evaluar resistencia del sistema.</p><div class="media-placeholder orange" data-slot="captura_escenario_estres" data-source="FlexSim" data-purpose="Insertar captura o tabla del escenario estrés.">PLACEHOLDER ESTRÉS</div></div></div>
+      </div>
+      <footer class="footer"><span>Escenarios | Cambiar pocas variables para que la comparación sea defendible</span><span>12</span></footer>
+    </section>
+
+    <!-- SLIDE 13 -->
+    <section class="slide" data-title="Resultados">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Results</span></div></div><div class="section-label">13. Resultados comparativos</div></header>
+      <div class="content grid-2">
+        <div class="stack">
+          <h2>La comparación debe demostrar si el cambio propuesto mejora tiempos, WIP, throughput y utilización.</h2>
+          <div class="media-placeholder" data-slot="grafica_comparacion_escenarios_kpis" data-source="FlexSim / resultados exportados" data-purpose="Insertar gráfica comparativa A vs B vs C para Lead Time, WIP, tareas completadas, utilización QA y retrabajo.">
+            PLACEHOLDER GRÁFICA PRINCIPAL: comparación de escenarios
+            <small>Esta debe ser una de las gráficas más importantes de la presentación.</small>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="media-placeholder orange" data-slot="tabla_resultados_escenarios" data-source="FlexSim / Excel de resultados" data-purpose="Insertar tabla con métricas numéricas por escenario.">
+            PLACEHOLDER TABLA: resultados A/B/C
+            <small>Columnas sugeridas: Base, Mejora, Estrés. Filas: Lead Time, WIP, tareas completadas, utilización QA, retrabajo.</small>
+          </div>
+          <div class="card teal"><h3>Interpretación esperada</h3><p class="caption">El mejor escenario no es el más bonito visualmente, sino el que reduce congestión y mejora desempeño sin ocultar costos operativos. La discusión debe decir qué métrica prueba la mejora.</p></div>
+        </div>
+      </div>
+      <footer class="footer"><span>Resultados | Sin comparación, la simulación no produce decisión</span><span>13</span></footer>
+    </section>
+
+    <!-- SLIDE 14 -->
+    <section class="slide" data-title="Discusión">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Discussion</span></div></div><div class="section-label">14. Discusión y propuesta</div></header>
+      <div class="content grid-2">
+        <div class="stack center-y">
+          <h2>La discusión convierte resultados en criterio gerencial.</h2>
+          <div class="insight-row"><div class="insight-icon">1</div><div><h3>Cuello de botella</h3><p class="caption">Evaluar si QA concentra espera, alta utilización o acumulación en cola frente a desarrollo.</p></div></div>
+          <div class="insight-row orange"><div class="insight-icon">2</div><div><h3>Efecto del retrabajo</h3><p class="caption">Relacionar el 24,1% histórico con retornos, incremento de WIP y aumento de tiempos de entrega.</p></div></div>
+          <div class="insight-row"><div class="insight-icon">3</div><div><h3>Decisión recomendada</h3><p class="caption">Recomendar una mejora solo si el escenario simulado demuestra beneficio frente al base.</p></div></div>
+        </div>
+        <div class="media-placeholder" data-slot="grafica_cuello_botella_discusion" data-source="FlexSim / dashboards" data-purpose="Insertar gráfica o dashboard que evidencie cuello de botella: colas, utilización por recurso o tiempo por etapa.">
+          PLACEHOLDER VISUAL: evidencia del cuello de botella
+          <small>Ideal: utilización developers vs QA o tamaño de cola por etapa.</small>
+        </div>
+      </div>
+      <footer class="footer"><span>Discusión | Explicar causas, no solo mostrar números</span><span>14</span></footer>
+    </section>
+
+    <!-- SLIDE 15 -->
+    <section class="slide" data-title="Conclusiones y referencias">
+      <header class="topbar"><div class="brand"><div class="brand-mark"></div><div class="brand-text"><strong>Software Solutions</strong><span>Closing</span></div></div><div class="section-label">15. Conclusiones y referencias</div></header>
+      <div class="content grid-2">
+        <div class="stack center-y">
+          <h2>Conclusiones preliminares</h2>
+          <div class="card teal"><h3>El modelo debe validarse contra métricas históricas</h3><p class="caption">WIP, Lead Time, Cycle Time, tareas completadas, saturación QA, bugs y frecuencia de retrabajo permiten contrastar la simulación con el comportamiento observado.</p></div>
+          <div class="card orange"><h3>La mejora debe salir de la comparación</h3><p class="caption">Si el escenario de aumentar QA reduce WIP, espera y utilización extrema sin empeorar throughput, la recomendación queda respaldada por evidencia.</p></div>
+          <div class="card"><h3>Limitación declarada</h3><p class="caption">La llegada se aproxima desde datos diarios y las etapas sin tiempo histórico separado deben tratarse como supuestos o pasos conceptuales.</p></div>
+        </div>
+        <div class="stack">
+          <div class="media-placeholder" data-slot="lista_referencias_minimo_10" data-source="Elicit / Consensus / Research Rabbit / SciSpace" data-purpose="Insertar referencias finales, mínimo 10, en formato APA/IEEE consistente.">
+            PLACEHOLDER REFERENCIAS: mínimo 10 fuentes
+            <small>Completar cuando esté lista la revisión de literatura.</small>
+          </div>
+          <div class="card dark"><h3>Mensaje final</h3><p class="lead" style="font-size:22px;color:white">La simulación no reemplaza la decisión gerencial; la vuelve medible, comparable y defendible.</p></div>
+        </div>
+      </div>
+      <footer class="footer"><span>Conclusiones | Presentación tipo paper con evidencia visual y decisión final</span><span>15</span></footer>
+    </section>
+  </main>
+
+  <div class="nav-controls" aria-label="Controles de navegación">
+    <button id="prevBtn" type="button">←</button>
+    <select id="slideSelect" aria-label="Seleccionar diapositiva"></select>
+    <button id="nextBtn" type="button">→</button>
+  </div>
+  <div class="progress" id="progress"></div>
+
+  <script>
+    // Navegación 100% offline, sin dependencias externas.
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const select = document.getElementById('slideSelect');
+    const progress = document.getElementById('progress');
+    let current = 0;
+
+    slides.forEach((slide, index) => {
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = `${String(index + 1).padStart(2, '0')} · ${slide.dataset.title || 'Slide'}`;
+      select.appendChild(option);
+    });
+
+    function showSlide(index) {
+      current = Math.max(0, Math.min(index, slides.length - 1));
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      select.value = current;
+      progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => showSlide(current - 1));
+    document.getElementById('nextBtn').addEventListener('click', () => showSlide(current + 1));
+    select.addEventListener('change', (event) => showSlide(Number(event.target.value)));
+
+    window.addEventListener('keydown', (event) => {
+      if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); showSlide(current + 1); }
+      if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); showSlide(current - 1); }
+      if (event.key === 'Home') showSlide(0);
+      if (event.key === 'End') showSlide(slides.length - 1);
+    });
+
+    showSlide(0);
+  </script>
+</body>
+</html>
